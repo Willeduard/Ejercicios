@@ -1,6 +1,15 @@
-from flask import Flask,redirect,url_for,render_template,request
+from flask import Flask,redirect,url_for,render_template,request,session
+from flask_sqlalchemy import SQLAlchemy
+from models.user import User, db
+
 
 app=Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+db.init_app(app)
+
+with app.app_context():
+    db.create_all()
+
 @app.route('/',methods=['GET','POST'])
 def home():
    if request.method=='POST':
@@ -15,9 +24,12 @@ def register():
         username = request.form['username']
         password = request.form['password']
         email = request.form['email']
-
+        
         # Validar datos y guardarlos en la base de datos
         # ...
+        user = User(username=username, password=password, email=email)
+        db.session.add(user)
+        db.session.commit()
 
         return redirect(url_for('home'))
 
